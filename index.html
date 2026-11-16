@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Générateur de fiches</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>Générateur de fiches</h1>
+      <span class="sub">Pages de titre A4 · 100 % local</span>
+    </div>
+    <div class="actions">
+      <button id="btnNew" class="primary">+ Nouvelle fiche</button>
+      <button id="btnExport" title="Télécharger un fichier de sauvegarde de toute la base">Sauvegarder la base</button>
+      <label class="btn" title="Restaurer depuis un fichier de sauvegarde">
+        Restaurer…<input id="inpImport" type="file" accept=".json,application/json" hidden>
+      </label>
+      <button id="btnSettings">Ressources</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="assetWarn" class="notice" hidden></div>
+
+    <section class="listbar">
+      <label class="chk"><input type="checkbox" id="chkAll"> Tout sélectionner</label>
+      <span id="selCount" class="muted"></span>
+      <div class="spacer"></div>
+      <label class="chk" title="Si plusieurs PDF : un seul fichier .zip, sinon un téléchargement par fiche">
+        <input type="checkbox" id="chkZip" checked> Regrouper en ZIP
+      </label>
+      <button id="btnGenSel" class="primary" disabled>Générer la sélection</button>
+      <button id="btnGenAll">Générer tout</button>
+    </section>
+
+    <table class="entries">
+      <thead>
+        <tr>
+          <th class="c-chk"></th>
+          <th class="c-img">Image</th>
+          <th>Titre</th>
+          <th class="c-logo">Logo</th>
+          <th>PDF annexé</th>
+          <th class="c-date">Modifiée</th>
+          <th class="c-act"></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p id="empty" class="empty" hidden>Aucune fiche. Cliquez sur « + Nouvelle fiche ».</p>
+    <p id="progress" class="muted"></p>
+  </main>
+
+  <!-- Éditeur -->
+  <div id="editor" class="overlay" hidden>
+    <div class="editor">
+      <div class="editor-head">
+        <h2 id="edTitle">Fiche</h2>
+        <div class="actions">
+          <button id="edDownload">Télécharger le PDF</button>
+          <button id="edClose" class="primary">Fermer</button>
+        </div>
+      </div>
+      <div class="editor-body">
+        <form id="form" class="form" autocomplete="off">
+          <p class="hint">Enregistrement automatique. <b>**texte**</b> = gras · dans les listes, <b>une ligne = une puce</b> · <b>//</b> = retour à la ligne forcé dans une puce.</p>
+
+          <div class="row2">
+            <div class="field">
+              <label>Image (carré en haut à droite)</label>
+              <div class="imgpick">
+                <div id="imgPreview" class="imgprev"></div>
+                <div class="col">
+                  <label class="btn">Choisir une image…<input id="inpImage" type="file" accept="image/*" hidden></label>
+                  <button type="button" id="btnImgClear" class="link">Retirer</button>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Logo</label>
+              <div id="logoChoice" class="logos"></div>
+            </div>
+          </div>
+
+          <div class="field"><label for="f_title">Titre <span class="muted">(une ligne par ligne de titre)</span></label>
+            <textarea id="f_title" name="title" rows="2"></textarea></div>
+          <div class="field"><label for="f_but">But</label>
+            <textarea id="f_but" name="but" rows="2"></textarea></div>
+          <div class="field"><label for="f_quand">A utiliser quand… <span class="muted">(puces)</span></label>
+            <textarea id="f_quand" name="quand" wrap="off" rows="3"></textarea></div>
+          <div class="field"><label for="f_pour">A utiliser pour… <span class="muted">(puces)</span></label>
+            <textarea id="f_pour" name="pour" wrap="off" rows="3"></textarea></div>
+          <div class="row3">
+            <div class="field"><label for="f_implication">Implication <span class="muted">(lignes)</span></label>
+              <textarea id="f_implication" name="implication" wrap="off" rows="3"></textarea></div>
+            <div class="field"><label for="f_materiel">Matériel <span class="muted">(puces)</span></label>
+              <textarea id="f_materiel" name="materiel" wrap="off" rows="3"></textarea></div>
+            <div class="field"><label for="f_temps">Temps <span class="muted">(puces)</span></label>
+              <textarea id="f_temps" name="temps" wrap="off" rows="3"></textarea></div>
+          </div>
+          <div class="field"><label for="f_etapes">Etapes-clé <span class="muted">(numérotation automatique)</span></label>
+            <textarea id="f_etapes" name="etapes" wrap="off" rows="4"></textarea></div>
+          <div class="field"><label for="f_attention">Points d’attention <span class="muted">(puces)</span></label>
+            <textarea id="f_attention" name="attention" wrap="off" rows="3"></textarea></div>
+
+          <div class="field">
+            <label>PDF à ajouter après la page de titre</label>
+            <div class="attach">
+              <span id="attName" class="muted">Aucun</span>
+              <label class="btn">Choisir un PDF…<input id="inpAttach" type="file" accept="application/pdf,.pdf" hidden></label>
+              <button type="button" id="btnAttClear" class="link">Retirer</button>
+            </div>
+          </div>
+        </form>
+        <div class="preview">
+          <div id="pvWarn" class="notice small" hidden></div>
+          <iframe id="pvFrame" title="Aperçu PDF"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ressources -->
+  <div id="settings" class="overlay" hidden>
+    <div class="dialog">
+      <div class="editor-head">
+        <h2>Ressources</h2>
+        <button id="stClose" class="primary">Fermer</button>
+      </div>
+      <h3>Polices Zeitung Pro</h3>
+      <p class="muted">Soit vous déposez les fichiers dans <code>assets/fonts/</code> (ZeitungPro-Regular, ZeitungPro-Semibold, ZeitungPro-Bold en .otf/.ttf), soit vous les chargez ici : elles restent alors uniquement dans ce navigateur (pratique si le dépôt GitHub est public).</p>
+      <div class="fontgrid">
+        <div>Regular</div><span id="st_regular"></span><label class="btn">Charger…<input data-font="regular" type="file" accept=".otf,.ttf,.woff" hidden></label>
+        <div>Semibold</div><span id="st_semibold"></span><label class="btn">Charger…<input data-font="semibold" type="file" accept=".otf,.ttf,.woff" hidden></label>
+        <div>Bold</div><span id="st_bold"></span><label class="btn">Charger…<input data-font="bold" type="file" accept=".otf,.ttf,.woff" hidden></label>
+      </div>
+      <button id="btnFontsClear" class="link">Oublier les polices chargées dans le navigateur</button>
+      <h3>Logos</h3>
+      <p class="muted">Déposez vos deux logos dans <code>assets/logos/</code> sous les noms <code>logo-1.png</code> et <code>logo-2.png</code> (ou .jpg). Format carré conseillé ; ils sont découpés en rond dans le cercle rouge.</p>
+      <div id="stLogos" class="logos"></div>
+      <h3>Stockage</h3>
+      <p class="muted" id="stStorage"></p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="vendor/pdf-lib.min.js"></script>
+  <script src="vendor/fontkit.umd.min.js"></script>
+  <script src="vendor/jszip.min.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
