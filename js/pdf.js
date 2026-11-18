@@ -6,7 +6,7 @@
    ========================================================================= */
 (function () {
   'use strict';
-  const { PDFDocument, StandardFonts, cmyk, pushGraphicsState, popGraphicsState,
+  const { PDFDocument, StandardFonts, cmyk, rgb, pushGraphicsState, popGraphicsState,
           moveTo, appendBezierCurve, closePath, clip, endPath } = PDFLib;
 
   const PAGE_W = 595.276, PAGE_H = 841.89;
@@ -18,6 +18,10 @@
   const WHITE = cmyk(0, 0, 0, 0);
   const GREY  = cmyk(0, 0, 0, 0.08);
   const RED   = cmyk(0.109, 1, 0.922, 0.022);
+  const ORANGE = rgb(0xfa / 255, 0xa2 / 255, 0x26 / 255); // #faa226
+
+  // Couleur du cercle autour du logo, selon le logo choisi
+  const LOGO_RING = { '1': ORANGE, '2': RED };
 
   // Libellés invariables (surlignés en rouge dans le PDF de référence)
   const LABELS = {
@@ -325,7 +329,7 @@
     } else {
       warnings.push(`Logo ${entry.logo || '1'} introuvable dans assets/logos/.`);
     }
-    R.circle(cx, cy, LOGO_R, RED, 2.05);
+    R.circle(cx, cy, LOGO_R, LOGO_RING[entry.logo || '1'] || RED, 2.05);
     R.hLine(102.331, XR, cy);
     y = cy + LOGO_R;
 
