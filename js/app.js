@@ -352,7 +352,7 @@
     $('#logoChoice').innerHTML = ['1', '2'].map(n => `
       <label class="logo ${current.logo === n ? 'on' : ''}">
         <input type="radio" name="logo" value="${n}" ${current.logo === n ? 'checked' : ''}>
-        <span class="ring">${logoThumb(n)}</span><span>Logo ${n}</span>
+        <span class="ring ring-${n}">${logoThumb(n)}</span><span>Logo ${n}</span>
       </label>`).join('');
   }
   $('#logoChoice').addEventListener('change', ev => {
@@ -423,7 +423,7 @@
         ? (userFonts[k] ? '<span class="ok">✓ chargée dans le navigateur</span>' : '<span class="ok">✓ assets/fonts</span>')
         : '<span class="missing">absente</span>';
     });
-    $('#stLogos').innerHTML = ['1', '2'].map(n => `<div class="logo"><span class="ring">${logoThumb(n)}</span><span>${logoStatus[n] ? esc(logoStatus[n].url) : 'assets/logos/logo-' + n + '.png'}</span></div>`).join('');
+    $('#stLogos').innerHTML = ['1', '2'].map(n => `<div class="logo"><span class="ring ring-${n}">${logoThumb(n)}</span><span>${logoStatus[n] ? esc(logoStatus[n].url) : 'assets/logos/logo-' + n + '.png'}</span></div>`).join('');
     installUiFonts();
     if (current) { renderLogos(); schedulePreview(0); }
   }
